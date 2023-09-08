@@ -1,6 +1,7 @@
 
 /*
-原始版本，多文件编译方式为一个源代码文件 + 多个头文件
+CPUver2.0，多文件编译为多个源代码文件 + 一个头文件
+使用数组作为形参进行传值
 */
 #include <iostream>
 #include <cmath>
@@ -11,8 +12,12 @@
 #include <string>
 #include <omp.h>
 #include "basicVar.h"
-#include "LBM.h"
 
+double w[Q] = { 4.0 / 9,1.0 / 9,1.0 / 9,1.0 / 9,1.0 / 9,1.0 / 36,1.0 / 36,1.0 / 36,1.0 / 36 }; //权系数
+double rho[NX + 1][NY + 1], u[NX + 1][NY + 1][2], u0[NX + 1][NY + 1][2], f[NX + 1][NY + 1][Q], F[NX + 1][NY + 1][Q];
+//密度，n+1时层速度，n时层速度，演化前密度分布函数，演化后密度分布函数
+//int i, j, k, ip, jp, n; //k即为alpha
+double error;
 
 int main()
 {
@@ -22,7 +27,7 @@ int main()
 
 	for (int n = 0;; n++)
 	{
-		evolution();
+		evolution(rho, u, u0, f, F);
 		if (n % 100 == 0)
 		{
 			Error();
@@ -47,8 +52,8 @@ void init() //初始化
 {
 	cout << "tau_f = " << tau_f << endl;
 
-	for (int i = 0; i < NX; i++) //初始化
-		for (int j = 0; j < NY; j++)
+	for (int i = 0; i <= NX; i++) //初始化
+		for (int j = 0; j <= NY; j++)
 		{
 			u[i][j][0] = 0;
 			u[i][j][1] = 0;
@@ -77,9 +82,9 @@ void output(int m) //输出
 	ostringstream name;
 	name << "cavity_" << m << ".dat";
 	ofstream out(name.str().c_str());
-	out << "Title=\"LBM Lid Driven Flow\"\n" << "VARIABLES = \"X\",\"Y\",\"U\",\"V\",\"P\"\n" << "ZONE T= \"BOX\",I= " << NX << ",J= " << NY << ",F=POINT" << endl;
-	for (int j = 0; j < NY; j++)
-		for (int i = 0; i < NX; i++)
+	out << "Title=\"LBM Lid Driven Flow\"\n" << "VARIABLES = \"X\",\"Y\",\"U\",\"V\",\"P\"\n" << "ZONE T= \"BOX\",I= " << NX + 1 << ",J= " << NY + 1 << ",F=POINT" << endl;
+	for (int j = 0; j <= NY; j++)
+		for (int i = 0; i <= NX; i++)
 		{
 			out << i << " " << j << " " << u[i][j][0] << " " << u[i][j][1] << " " << rho[i][j] / 3. << endl;
 		}
@@ -90,8 +95,8 @@ void Error()
 	double temp1, temp2;
 	temp1 = 0;
 	temp2 = 0;
-	for (int i = 1; i < NX - 1; i++)
-		for (int j = 1; j < NY - 1; j++)
+	for (int i = 1; i < NX; i++)
+		for (int j = 1; j < NY; j++)
 		{
 			temp1 += ((u[i][j][0] - u0[i][j][0]) * (u[i][j][0] - u0[i][j][0]) + (u[i][j][1] - u0[i][j][1]) * (u[i][j][1] - u0[i][j][1]));
 			temp2 += (u[i][j][0] * u[i][j][0] + u[i][j][1] * u[i][j][1]);

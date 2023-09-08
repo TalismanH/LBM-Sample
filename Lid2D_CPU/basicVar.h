@@ -14,15 +14,9 @@ const int Re = 1000;
 const double niu = U * NX / Re;
 const double tau_f = 3.0 * niu + 0.5;
 
-double w[Q] = { 4.0 / 9,1.0 / 9,1.0 / 9,1.0 / 9,1.0 / 9,1.0 / 36,1.0 / 36,1.0 / 36,1.0 / 36 }; //权系数
-double rho[NX][NY], u[NX][NY][2], u0[NX][NY][2], f[NX][NY][Q], F[NX][NY][Q];
-//密度，n+1时层速度，n时层速度，演化前密度分布函数，演化后密度分布函数
-//int i, j, k, ip, jp, n; //k即为alpha
-double error;
-
 void init(); //初始化函数
 double feq(int k, double rho, double u[2]); //平衡态函数
-void evolution();
+void evolution(double rho[NX + 1][NY + 1], double u[NX + 1][NY + 1][2], double u0[NX + 1][NY + 1][2], double f[NX + 1][NY + 1][Q], double F[NX + 1][NY + 1][Q]);
 //演化函数
 void output(int m); //输出函数
 void Error(); //误差函数
