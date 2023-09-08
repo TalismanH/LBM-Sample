@@ -22,7 +22,7 @@ void init(); //初始化函数
 double feq(const int k, const double rho, const double ux, const double uy); //平衡态分布函数
 void evolution(double* rho, double* ux, double* uy, double* u0x, double* u0y,
 			   double* f0, double* f1, double* f2, double* f3, double* f4, double* f5, double* f6, double* f7, double* f8,
-			   double* F0, double* F1, double* F2, double* F3, double* F4, double* F5, double* F6, double* F7, double* F8);
+			   int* Flag);
 //演化函数
 void output(int m); //输出函数
 double Error(const double * ux, const double * uy, const double * u0x, const double * u0y); //误差函数

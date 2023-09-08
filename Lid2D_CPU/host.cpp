@@ -1,7 +1,12 @@
 
 /*
-CPUver3.0 是使用了 malloc 和 free 的版本
-同时不再使用多维数组，分布函数声明为 9个 独立指针
+CPUver4.0 在 ver3.0 基础上加入了 Flag 标记和 Swap
+
+2021.2.27 Swap 未实现
+2021.2.27 22:30 Swap 已实现：采用两次交换（第一次和相邻节点交换，第二次节点内部交换）
+				
+使用 Swap 前计算时间为250秒左右，使用后为330秒左右
+未达到论文所述的“计算加速 1.2 - 1.3 倍”，仍需改进
 */
 
 //引入头文件
@@ -20,7 +25,8 @@ double* rho;												//密度
 double* ux, * uy;											//速度
 double* u0x, * u0y;											//保存上一时步的速度
 double* f0, * f1, * f2, * f3, * f4, * f5, * f6, * f7, * f8;	//分布函数
-double* F0, * F1, * F2, * F3, * F4, * F5, * F6, * F7, * F8;	//保存上一时步的分布函数
+//double* F0, * F1, * F2, * F3, * F4, * F5, * F6, * F7, * F8;	//保存上一时步的分布函数
+int* Flag;												//标记
 
 
 int main()
@@ -34,7 +40,7 @@ int main()
 	{
 		evolution(rho, ux, uy, u0x, u0y,
 				  f0, f1, f2, f3, f4, f5, f6, f7, f8,
-				  F0, F1, F2, F3, F4, F5, F6, F7, F8);
+				  Flag);
 		if (n % 100 == 0)
 		{
 			error = Error(ux, uy, u0x, u0y);
@@ -72,7 +78,7 @@ void init() //初始化
 			//u0y[j * NX + i] = 0;
 
 			rho[j * NX + i] = rho0;
-			
+
 			ux[(NY - 1) * NX + i] = U; //顶部速度
 
 			//初始平衡状态
@@ -85,7 +91,18 @@ void init() //初始化
 			f6[j * NX + i] = feq(6, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]);
 			f7[j * NX + i] = feq(7, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]);
 			f8[j * NX + i] = feq(8, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]);
+		
+			//初始化标记
+			Flag[j * NX + i] = 'F';
+			Flag[j * NX] = 'L';
+			Flag[j * NX + NX - 1] = 'R';
+			Flag[i] = 'B';
+			Flag[(NY - 1) * NX + i] = 'T';
 		}
+	Flag[0] = 'M';
+	Flag[NX - 1] = 'N';
+	Flag[(NY - 1) * NX] = 'Q';
+	Flag[NX * NY - 1] = 'P';
 }
 
 double feq(const int k, const double rho, const double ux, const double uy) //计算平衡态分布函数
@@ -99,20 +116,23 @@ double feq(const int k, const double rho, const double ux, const double uy) //计
 void memoryInitiate() {
 
 	size_t size = NX * NY * sizeof(double);
+	size_t size_int = NX * NY * sizeof(int);
 
 	rho = (double*)malloc(size);
 	ux  = (double*)malloc(size);		uy  = (double*)malloc(size);
 	u0x = (double*)malloc(size);		u0y = (double*)malloc(size);
 
-	f0  = (double*)malloc(size);		F0  = (double*)malloc(size);
-	f1  = (double*)malloc(size);		F1  = (double*)malloc(size);
-	f2  = (double*)malloc(size);		F2  = (double*)malloc(size);
-	f3  = (double*)malloc(size);		F3  = (double*)malloc(size);
-	f4  = (double*)malloc(size);		F4  = (double*)malloc(size);
-	f5  = (double*)malloc(size);		F5  = (double*)malloc(size);
-	f6  = (double*)malloc(size);		F6  = (double*)malloc(size);
-	f7  = (double*)malloc(size);		F7  = (double*)malloc(size);
-	f8  = (double*)malloc(size);		F8  = (double*)malloc(size);
+	f0  = (double*)malloc(size);		//F0  = (double*)malloc(size);
+	f1  = (double*)malloc(size);		//F1  = (double*)malloc(size);
+	f2  = (double*)malloc(size);		//F2  = (double*)malloc(size);
+	f3  = (double*)malloc(size);		//F3  = (double*)malloc(size);
+	f4  = (double*)malloc(size);		//F4  = (double*)malloc(size);
+	f5  = (double*)malloc(size);		//F5  = (double*)malloc(size);
+	f6  = (double*)malloc(size);		//F6  = (double*)malloc(size);
+	f7  = (double*)malloc(size);		//F7  = (double*)malloc(size);
+	f8  = (double*)malloc(size);		//F8  = (double*)malloc(size);
+
+	Flag = (int*)malloc(size_int);
 }
 
 
@@ -122,15 +142,17 @@ void memoryfinalize() {
 	free(ux);		free(uy);
 	free(u0x);		free(u0y);
 
-	free(f0);		free(F0);
-	free(f1);		free(F1);
-	free(f2);		free(F2);
-	free(f3);		free(F3);
-	free(f4);		free(F4);
-	free(f5);		free(F5);
-	free(f6);		free(F6);
-	free(f7);		free(F7);
-	free(f8);		free(F8);
+	free(f0);		//free(F0);
+	free(f1);		//free(F1);
+	free(f2);		//free(F2);
+	free(f3);		//free(F3);
+	free(f4);		//free(F4);
+	free(f5);		//free(F5);
+	free(f6);		//free(F6);
+	free(f7);		//free(F7);
+	free(f8);		//free(F8);
+
+	free(Flag);
 }
 
 

@@ -1,9 +1,17 @@
 
 #include "basicVar.h"
 
+
+inline void Swap(double& f1, double& f2) {
+
+	double temp = f1;
+	f1 = f2;
+	f2 = temp;
+}
+
 void evolution(double* rho, double* ux, double* uy, double* u0x, double* u0y,
 			   double* f0, double* f1, double* f2, double* f3, double* f4, double* f5, double* f6, double* f7, double* f8,
-			   double* F0, double* F1, double* F2, double* F3, double* F4, double* F5, double* F6, double* F7, double* F8)
+			   int* Flag)
 {
 
 	/*
@@ -19,19 +27,20 @@ void evolution(double* rho, double* ux, double* uy, double* u0x, double* u0y,
 	因为在原始版本中，F[i][j][k] = f[ip][jp][k] + (feq(k, rho[ip][jp], u[ip][jp]) - f[ip][jp][k]) / tau_f; 等号右边将边界一并计算了
 	而在本程序的碰撞代码中，并没有计算边界上的分布函数
 	*/
-	for (int i = 1; i < NX - 1; i++) //除去左右边界
-		for (int j = 1; j < NY - 1; j++) //除去上下边界
+	for (int i = 0; i < NX; i++)
+		for (int j = 0; j < NY; j++)
 		{
-			f0[j * NX + i] = f0[j * NX + i] + (feq(0, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f0[j * NX + i]) / tau_f;
-			f1[j * NX + i] = f1[j * NX + i] + (feq(1, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f1[j * NX + i]) / tau_f;
-			f2[j * NX + i] = f2[j * NX + i] + (feq(2, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f2[j * NX + i]) / tau_f;
-			f3[j * NX + i] = f3[j * NX + i] + (feq(3, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f3[j * NX + i]) / tau_f;
-			f4[j * NX + i] = f4[j * NX + i] + (feq(4, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f4[j * NX + i]) / tau_f;
-			f5[j * NX + i] = f5[j * NX + i] + (feq(5, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f5[j * NX + i]) / tau_f;
-			f6[j * NX + i] = f6[j * NX + i] + (feq(6, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f6[j * NX + i]) / tau_f;
-			f7[j * NX + i] = f7[j * NX + i] + (feq(7, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f7[j * NX + i]) / tau_f;
-			f8[j * NX + i] = f8[j * NX + i] + (feq(8, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f8[j * NX + i]) / tau_f;
-			
+			if (Flag[j * NX + i] == 'F') {
+				f0[j * NX + i] = f0[j * NX + i] + (feq(0, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f0[j * NX + i]) / tau_f;
+				f1[j * NX + i] = f1[j * NX + i] + (feq(1, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f1[j * NX + i]) / tau_f;
+				f2[j * NX + i] = f2[j * NX + i] + (feq(2, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f2[j * NX + i]) / tau_f;
+				f3[j * NX + i] = f3[j * NX + i] + (feq(3, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f3[j * NX + i]) / tau_f;
+				f4[j * NX + i] = f4[j * NX + i] + (feq(4, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f4[j * NX + i]) / tau_f;
+				f5[j * NX + i] = f5[j * NX + i] + (feq(5, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f5[j * NX + i]) / tau_f;
+				f6[j * NX + i] = f6[j * NX + i] + (feq(6, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f6[j * NX + i]) / tau_f;
+				f7[j * NX + i] = f7[j * NX + i] + (feq(7, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f7[j * NX + i]) / tau_f;
+				f8[j * NX + i] = f8[j * NX + i] + (feq(8, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f8[j * NX + i]) / tau_f;
+			}
 			//F0[j * NX + i] = f0[j * NX + i		] + (feq(0, rho[j * NX + i], ux[j * NX + i], uy[j * NX + i]) - f0[j * NX + i]) / tau_f;
 			//F1[j * NX + i] = f1[j * NX + i - 1	] + (feq(1, rho[j * NX + i - 1], ux[j * NX + i - 1], uy[j * NX + i - 1]) - f1[j * NX + i - 1]) / tau_f;
 			//F2[j * NX + i] = f2[(j - 1) * NX + i] + (feq(2, rho[(j - 1) * NX + i], ux[(j - 1) * NX + i], uy[(j - 1) * NX + i]) - f2[(j - 1) * NX + i]) / tau_f;
@@ -82,25 +91,53 @@ void evolution(double* rho, double* ux, double* uy, double* u0x, double* u0y,
 		f6[i] = feq(6, rho[i + NX], 0, 0) + f6[i + NX] - feq(6, rho[i + NX], ux[i + NX], uy[i + NX]);
 	}
 
-	//四个角落
-	//f5[0] = feq(5, rho[NX + 1], 0, 0) + f5[NX + 1] - feq(5, rho[NX + 1], ux[NX + 1], uy[NX + 1]); //左下角
-	//f6[NX - 1] = feq(6, rho[2 * NX - 2], 0, 0) + f6[2 * NX - 2] - feq(6, rho[2 * NX - 2], ux[2 * NX - 2], uy[2 * NX - 2]); //右下角
-	//f8[(NY - 1) * NX] = feq(8, rho[(NY - 2) * NX + 1], U, 0) + f8[(NY - 2) * NX + 1] - feq(8, rho[(NY - 2) * NX + 1], ux[(NY - 2) * NX + 1], uy[(NY - 2) * NX + 1]);
-	//f7[NY * NX - 1] = feq(7, rho[(NY - 1) * NX - 2], U, 0) + f7[(NY - 1) * NX - 2] - feq(7, rho[(NY - 1) * NX - 2], ux[(NY - 1) * NX - 2], uy[(NY - 1) * NX - 2]);
-
-	for (int i = 1; i < NX - 1; ++i)
-		for (int j = 1; j < NY - 1; ++j) {
-	
-			F0[j * NX + i] = f0[j * NX + i];
-			F1[j * NX + i] = f1[j * NX + i - 1];
-			F2[j * NX + i] = f2[(j - 1) * NX + i];
-			F3[j * NX + i] = f3[j * NX + i + 1];
-			F4[j * NX + i] = f4[(j + 1) * NX + i];
-			F5[j * NX + i] = f5[(j - 1) * NX + i - 1];
-			F6[j * NX + i] = f6[(j - 1) * NX + i + 1];
-			F7[j * NX + i] = f7[(j + 1) * NX + i + 1];
-			F8[j * NX + i] = f8[(j + 1) * NX + i - 1];
+	for (int i = 0; i < NX; i++)
+		for (int j = 0; j < NY; j++)
+		{
+			if (Flag[j * NX + i] == 'F') {
+				Swap(f1[j * NX + i], f3[j * NX + i + 1]);
+				Swap(f2[j * NX + i], f4[(j + 1) * NX + i]);
+				Swap(f5[j * NX + i], f7[(j + 1) * NX + i + 1]);
+				Swap(f6[j * NX + i], f8[(j + 1) * NX + i - 1]);
+			}
+			if (Flag[j * NX + i] == 'L') {
+				Swap(f1[j * NX + i], f3[j * NX + i + 1]);
+				Swap(f5[j * NX + i], f7[(j + 1) * NX + i + 1]);
+			}
+			if (Flag[j * NX + i] == 'B') {
+				Swap(f2[j * NX + i], f4[(j + 1) * NX + i]);
+				Swap(f5[j * NX + i], f7[(j + 1) * NX + i + 1]);
+				Swap(f6[j * NX + i], f8[(j + 1) * NX + i - 1]);
+			}
+			if (Flag[j * NX + i] == 'R') {
+				Swap(f6[j * NX + i], f8[(j + 1) * NX + i - 1]);
+			}
+			if (Flag[j * NX + i] == 'M') Swap(f5[j * NX + i], f7[(j + 1) * NX + i + 1]);
+			if (Flag[j * NX + i] == 'N') Swap(f6[j * NX + i], f8[(j + 1) * NX + i - 1]);
 		}
+	for (int i = 1; i < NX - 1; i++)
+		for (int j = 1; j < NY - 1; j++)
+		{
+			Swap(f1[j * NX + i], f3[j * NX + i]);
+			Swap(f2[j * NX + i], f4[j * NX + i]);
+			Swap(f5[j * NX + i], f7[j * NX + i]);
+			Swap(f6[j * NX + i], f8[j * NX + i]);
+		}
+	
+	//迁移
+	//for (int i = 1; i < NX - 1; ++i)
+	//	for (int j = 1; j < NY - 1; ++j) {
+	//
+	//		F0[j * NX + i] = f0[j * NX + i];
+	//		F1[j * NX + i] = f1[j * NX + i - 1];
+	//		F2[j * NX + i] = f2[(j - 1) * NX + i];
+	//		F3[j * NX + i] = f3[j * NX + i + 1];
+	//		F4[j * NX + i] = f4[(j + 1) * NX + i];
+	//		F5[j * NX + i] = f5[(j - 1) * NX + i - 1];
+	//		F6[j * NX + i] = f6[(j - 1) * NX + i + 1];
+	//		F7[j * NX + i] = f7[(j + 1) * NX + i + 1];
+	//		F8[j * NX + i] = f8[(j + 1) * NX + i - 1];
+	//	}
 
 	for (int i = 1; i < NX - 1; i++) //计算宏观量
 		for (int j = 1; j < NY - 1; j++)
@@ -108,15 +145,15 @@ void evolution(double* rho, double* ux, double* uy, double* u0x, double* u0y,
 			u0x[j * NX + i] = ux[j * NX + i];
 			u0y[j * NX + i] = uy[j * NX + i];
 
-			f0[j * NX + i] = F0[j * NX + i];
-			f1[j * NX + i] = F1[j * NX + i];
-			f2[j * NX + i] = F2[j * NX + i];
-			f3[j * NX + i] = F3[j * NX + i];
-			f4[j * NX + i] = F4[j * NX + i];
-			f5[j * NX + i] = F5[j * NX + i];
-			f6[j * NX + i] = F6[j * NX + i];
-			f7[j * NX + i] = F7[j * NX + i];
-			f8[j * NX + i] = F8[j * NX + i];
+			//f0[j * NX + i] = F0[j * NX + i];
+			//f1[j * NX + i] = F1[j * NX + i];
+			//f2[j * NX + i] = F2[j * NX + i];
+			//f3[j * NX + i] = F3[j * NX + i];
+			//f4[j * NX + i] = F4[j * NX + i];
+			//f5[j * NX + i] = F5[j * NX + i];
+			//f6[j * NX + i] = F6[j * NX + i];
+			//f7[j * NX + i] = F7[j * NX + i];
+			//f8[j * NX + i] = F8[j * NX + i];
 
 			//宏观密度
 			rho[j * NX + i] = f0[j * NX + i] + f1[j * NX + i] + f2[j * NX + i] + f3[j * NX + i] + f4[j * NX + i] + f5[j * NX + i] + f6[j * NX + i] + f7[j * NX + i] + f8[j * NX + i];
