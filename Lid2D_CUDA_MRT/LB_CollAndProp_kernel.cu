@@ -5,15 +5,15 @@ __device__ double meq(int k, double rho, double ux, double uy)
 {
 	switch (k) {
 
-	case(0): return rho;
-	case(1): return -2. * rho + 3. * (ux * ux + uy * uy) * rho;
-	case(2): return rho - 3. * (ux * ux + uy * uy) * rho;
-	case(3): return ux * rho;
-	case(4): return -ux * rho;
-	case(5): return uy * rho;
-	case(6): return -uy * rho;
-	case(7): return (ux * ux - uy * uy) * rho;
-	case(8): return ux * uy * rho;
+		case(0): return rho;
+		case(1): return -2. * rho + 3. * (ux * ux + uy * uy) * rho;
+		case(2): return rho - 3. * (ux * ux + uy * uy) * rho;
+		case(3): return ux * rho;
+		case(4): return -ux * rho;
+		case(5): return uy * rho;
+		case(6): return -uy * rho;
+		case(7): return (ux * ux - uy * uy) * rho;
+		case(8): return ux * uy * rho;
 	}
 }
 
@@ -45,12 +45,12 @@ __device__ __host__ double feq(int k, double rho, double ux, double uy)
 	return w[k] * (rho + 3. * eu + 4.5 * eu * eu - 1.5 * uv);
 }
 
-//__device__ inline void Swap( double & f1, double & f2 )
-//{
-//	double temp = f1;
-//	f1 = f2;
-//	f2 = temp;
-//}
+__device__ inline void Swap( double & f1, double & f2 )
+{
+	double temp = f1;
+	f1 = f2;
+	f2 = temp;
+}
 
 __global__ void LBColl(int nx, int ny, int* flag, double* S, double* rho, double* ux, double* uy, double* euler_xforce, double* euler_yforce,
 	double* f0, double* f1, double* f2, double* f3, double* f4, double* f5, double* f6, double* f7, double* f8)
@@ -112,92 +112,62 @@ __global__ void LBColl(int nx, int ny, int* flag, double* S, double* rho, double
 		__syncthreads();
 
 		f0[k] = mf0[tx] / 9. - mf1[tx] / 9. + mf2[tx] / 9.;
-		f1[k] = mf0[tx] / 9. - mf1[tx] / 36. - mf2[tx] / 18. + mf3[tx] / 6. - mf4[tx] / 6. + mf7[tx] / 4.;
-		f2[k] = mf0[tx] / 9. - mf1[tx] / 36. - mf2[tx] / 18. + mf5[tx] / 6. - mf6[tx] / 6. - mf7[tx] / 4.;
-		f3[k] = mf0[tx] / 9. - mf1[tx] / 36. - mf2[tx] / 18. - mf3[tx] / 6. + mf4[tx] / 6. + mf7[tx] / 4.;
-		f4[k] = mf0[tx] / 9. - mf1[tx] / 36. - mf2[tx] / 18. - mf5[tx] / 6. + mf6[tx] / 6. - mf7[tx] / 4.;
-		f5[k] = mf0[tx] / 9. + mf1[tx] / 18. + mf2[tx] / 36. + mf3[tx] / 6. + mf4[tx] / 12. + mf5[tx] / 6. + mf6[tx] / 12. + mf8[tx] / 4.;
-		f6[k] = mf0[tx] / 9. + mf1[tx] / 18. + mf2[tx] / 36. - mf3[tx] / 6. - mf4[tx] / 12. + mf5[tx] / 6. + mf6[tx] / 12. - mf8[tx] / 4.;
-		f7[k] = mf0[tx] / 9. + mf1[tx] / 18. + mf2[tx] / 36. - mf3[tx] / 6. - mf4[tx] / 12. - mf5[tx] / 6. - mf6[tx] / 12. + mf8[tx] / 4.;
-		f8[k] = mf0[tx] / 9. + mf1[tx] / 18. + mf2[tx] / 36. + mf3[tx] / 6. + mf4[tx] / 12. - mf5[tx] / 6. - mf6[tx] / 12. - mf8[tx] / 4.;
+		f3[k] = mf0[tx] / 9. - mf1[tx] / 36. - mf2[tx] / 18. + mf3[tx] / 6. - mf4[tx] / 6. + mf7[tx] / 4.;
+		f4[k] = mf0[tx] / 9. - mf1[tx] / 36. - mf2[tx] / 18. + mf5[tx] / 6. - mf6[tx] / 6. - mf7[tx] / 4.;
+		f1[k] = mf0[tx] / 9. - mf1[tx] / 36. - mf2[tx] / 18. - mf3[tx] / 6. + mf4[tx] / 6. + mf7[tx] / 4.;
+		f2[k] = mf0[tx] / 9. - mf1[tx] / 36. - mf2[tx] / 18. - mf5[tx] / 6. + mf6[tx] / 6. - mf7[tx] / 4.;
+		f7[k] = mf0[tx] / 9. + mf1[tx] / 18. + mf2[tx] / 36. + mf3[tx] / 6. + mf4[tx] / 12. + mf5[tx] / 6. + mf6[tx] / 12. + mf8[tx] / 4.;
+		f8[k] = mf0[tx] / 9. + mf1[tx] / 18. + mf2[tx] / 36. - mf3[tx] / 6. - mf4[tx] / 12. + mf5[tx] / 6. + mf6[tx] / 12. - mf8[tx] / 4.;
+		f5[k] = mf0[tx] / 9. + mf1[tx] / 18. + mf2[tx] / 36. - mf3[tx] / 6. - mf4[tx] / 12. - mf5[tx] / 6. - mf6[tx] / 12. + mf8[tx] / 4.;
+		f6[k] = mf0[tx] / 9. + mf1[tx] / 18. + mf2[tx] / 36. + mf3[tx] / 6. + mf4[tx] / 12. - mf5[tx] / 6. - mf6[tx] / 12. - mf8[tx] / 4.;
 
 	}
 }
 
 __global__ void LBProp(int nx, int ny, int* flag,
-	double* f0, double* f1, double* f2, double* f3, double* f4, double* f5, double* f6, double* f7, double* f8,
-	double* F0, double* F1, double* F2, double* F3, double* F4, double* F5, double* F6, double* F7, double* F8)
+	double* f0, double* f1, double* f2, double* f3, double* f4, double* f5, double* f6, double* f7, double* f8)
 {
 	int tx = threadIdx.x;
 	int k = blockIdx.y * nx + blockIdx.x * NUM_THREADS_LBM + tx;
 
-	//if( flag[ k ] == 'F' ) {
-	//
-	//	Swap( f1 [ k + 1 ],				f3 [ k ] );
-	//	Swap( f2 [ k + nx ],			f4 [ k ] );
-	//	Swap( f5 [ k + nx + 1 ],		f7 [ k ] );
-	//	Swap( f6 [ k + nx - 1 ],		f8 [ k ] );
-	//}
-	//
-	//if( flag[ k ] == 'L' ) {
-	//
-	//	Swap(f1[k + 1], f3[k]);
-	//	Swap(f5[k + nx + 1], f7[k]);
-	//}
-	//
-	//if( flag[ k ] == 'B' ) {
-	//
-	//	Swap(f2[k + nx], f4[k]);
-	//	Swap(f5[k + nx + 1], f7[k]);
-	//	Swap(f6[k + nx - 1], f8[k]);
-	//}
-	//
-	//if( flag[ k ] == 'R' ) {
-	//
-	//	Swap(f6[k + nx - 1], f8[k]);
-	//}
-	//
-	//if( flag[ k ] == 'M' ) {
-	//
-	//	Swap(f5[k + nx + 1], f7[k]);
-	//}
-	//
-	//if( flag[ k ] == 'N' ) {
-	//
-	//	Swap(f6[k + nx - 1], f8[k]);
-	//}
-	if (flag[k] == 'F') {
-		F0[k] = f0[k];
-		F1[k] = f1[k - 1];
-		F2[k] = f2[k - nx];
-		F3[k] = f3[k + 1];
-		F4[k] = f4[k + nx];
-		F5[k] = f5[k - nx - 1];
-		F6[k] = f6[k - nx + 1];
-		F7[k] = f7[k + nx + 1];
-		F8[k] = f8[k + nx - 1];
+	if( flag[ k ] == 'F' ) {
+
+		Swap( f1 [ k + 1 ],				f3 [ k ] );
+		Swap( f2 [ k + nx ],			f4 [ k ] );
+		Swap( f5 [ k + nx + 1 ],		f7 [ k ] );
+		Swap( f6 [ k + nx - 1 ],		f8 [ k ] );
+	}
+
+	if( flag[ k ] == 'L' ) {
+
+		Swap(f1[k + 1], f3[k]);
+		Swap(f5[k + nx + 1], f7[k]);
+	}
+
+	if( flag[ k ] == 'B' ) {
+
+		Swap(f2[k + nx], f4[k]);
+		Swap(f5[k + nx + 1], f7[k]);
+		Swap(f6[k + nx - 1], f8[k]);
+	}
+
+	if( flag[ k ] == 'R' ) {
+
+		Swap(f6[k + nx - 1], f8[k]);
+	}
+
+	if( flag[ k ] == 'M' ) {
+
+		Swap(f5[k + nx + 1], f7[k]);
+	}
+
+	if( flag[ k ] == 'N' ) {
+
+		Swap(f6[k + nx - 1], f8[k]);
 	}
 }
 
-__global__ void LBUpgrade(int nx, int ny, double* f0, double* f1, double* f2, double* f3, double* f4, double* f5, double* f6, double* f7, double* f8,
-	double* F0, double* F1, double* F2, double* F3, double* F4, double* F5, double* F6, double* F7, double* F8, int* flag) {
 
-	int tx = threadIdx.x;
-	int k = blockIdx.y * nx + blockIdx.x * NUM_THREADS_LBM + tx;
-
-	if (flag[k] == 'F') {
-
-		f0[k] = F0[k];
-		f1[k] = F1[k];
-		f2[k] = F2[k];
-		f3[k] = F3[k];
-		f4[k] = F4[k];
-		f5[k] = F5[k];
-		f6[k] = F6[k];
-		f7[k] = F7[k];
-		f8[k] = F8[k];
-	}
-}
 
 __global__ void LBBC(int nx, int ny, int* Flag, double* rho, double* ux, double* uy,
 	double* f0, double* f1, double* f2, double* f3, double* f4, double* f5, double* f6, double* f7, double* f8)
@@ -217,9 +187,9 @@ __global__ void LBBC(int nx, int ny, int* Flag, double* rho, double* ux, double*
 		_uy = uy[k + 1];
 
 		rho[k] = _rho;
-		f1[k] = feq(1, _rho, 0, 0) + f1[k + 1] - feq(1, _rho, _ux, _uy);
-		f5[k] = feq(5, _rho, 0, 0) + f5[k + 1] - feq(5, _rho, _ux, _uy);
-		f8[k] = feq(8, _rho, 0, 0) + f8[k + 1] - feq(8, _rho, _ux, _uy);
+		f3[k] = feq(1, _rho, 0, 0) + f3[k + 1] - feq(1, _rho, _ux, _uy);
+		f7[k] = feq(5, _rho, 0, 0) + f7[k + 1] - feq(5, _rho, _ux, _uy);
+		f6[k] = feq(8, _rho, 0, 0) + f6[k + 1] - feq(8, _rho, _ux, _uy);
 
 	}
 	//右边界
@@ -230,9 +200,9 @@ __global__ void LBBC(int nx, int ny, int* Flag, double* rho, double* ux, double*
 		_uy = uy[k - 1];
 
 		rho[k] = _rho;
-		f3[k] = feq(3, _rho, 0, 0) + f3[k - 1] - feq(3, _rho, _ux, _uy);
-		f6[k] = feq(6, _rho, 0, 0) + f6[k - 1] - feq(6, _rho, _ux, _uy);
-		f7[k] = feq(7, _rho, 0, 0) + f7[k - 1] - feq(7, _rho, _ux, _uy);
+		f1[k] = feq(3, _rho, 0, 0) + f1[k - 1] - feq(3, _rho, _ux, _uy);
+		f8[k] = feq(6, _rho, 0, 0) + f8[k - 1] - feq(6, _rho, _ux, _uy);
+		f5[k] = feq(7, _rho, 0, 0) + f5[k - 1] - feq(7, _rho, _ux, _uy);
 
 	}
 	//上边界
@@ -244,9 +214,9 @@ __global__ void LBBC(int nx, int ny, int* Flag, double* rho, double* ux, double*
 
 		rho[k] = _rho;
 		ux[k] = 0.1;
-		f4[k] = feq(4, _rho, 0.1, 0) + f4[k - nx] - feq(4, _rho, _ux, _uy);
-		f7[k] = feq(7, _rho, 0.1, 0) + f7[k - nx] - feq(7, _rho, _ux, _uy);
-		f8[k] = feq(8, _rho, 0.1, 0) + f8[k - nx] - feq(8, _rho, _ux, _uy);
+		f2[k] = feq(4, _rho, 0.1, 0) + f2[k - nx] - feq(4, _rho, _ux, _uy);
+		f5[k] = feq(7, _rho, 0.1, 0) + f5[k - nx] - feq(7, _rho, _ux, _uy);
+		f6[k] = feq(8, _rho, 0.1, 0) + f6[k - nx] - feq(8, _rho, _ux, _uy);
 	}
 	//下边界
 	if (Flag[k] == 'B') {
@@ -256,9 +226,9 @@ __global__ void LBBC(int nx, int ny, int* Flag, double* rho, double* ux, double*
 		_uy = uy[k + nx];
 
 		rho[k] = _rho;
-		f2[k] = feq(2, _rho, 0, 0) + f2[k + nx] - feq(2, _rho, _ux, _uy);
-		f5[k] = feq(5, _rho, 0, 0) + f5[k + nx] - feq(5, _rho, _ux, _uy);
-		f6[k] = feq(6, _rho, 0, 0) + f6[k + nx] - feq(6, _rho, _ux, _uy);
+		f4[k] = feq(2, _rho, 0, 0) + f4[k + nx] - feq(2, _rho, _ux, _uy);
+		f7[k] = feq(5, _rho, 0, 0) + f7[k + nx] - feq(5, _rho, _ux, _uy);
+		f8[k] = feq(6, _rho, 0, 0) + f8[k + nx] - feq(6, _rho, _ux, _uy);
 	}
 
 	if (Flag[k] == 'M') {
@@ -266,14 +236,14 @@ __global__ void LBBC(int nx, int ny, int* Flag, double* rho, double* ux, double*
 		_ux = ux[k + nx + 1];
 		_uy = uy[k + nx + 1];
 		rho[k] = _rho;
-		f5[k] = feq(5, _rho, 0, 0) + f5[k + nx + 1] - feq(5, _rho, _ux, _uy);
+		f7[k] = feq(5, _rho, 0, 0) + f7[k + nx + 1] - feq(5, _rho, _ux, _uy);
 	}
 	if (Flag[k] == 'N') {
 		_rho = rho[k + nx - 1];
 		_ux = ux[k + nx - 1];
 		_uy = uy[k + nx - 1];
 		rho[k] = _rho;
-		f6[k] = feq(6, _rho, 0, 0) + f6[k + nx - 1] - feq(6, _rho, _ux, _uy);
+		f8[k] = feq(6, _rho, 0, 0) + f8[k + nx - 1] - feq(6, _rho, _ux, _uy);
 	}
 	if (Flag[k] == 'Q') {
 		_rho = rho[k - nx + 1];
@@ -281,7 +251,7 @@ __global__ void LBBC(int nx, int ny, int* Flag, double* rho, double* ux, double*
 		_uy = uy[k - nx + 1];
 		rho[k] = _rho;
 		ux[k] = 0.1;
-		f8[k] = feq(8, _rho, 0.1, 0) + f8[k - nx + 1] - feq(8, _rho, _ux, _uy);
+		f6[k] = feq(8, _rho, 0.1, 0) + f6[k - nx + 1] - feq(8, _rho, _ux, _uy);
 	}
 	if (Flag[k] == 'P') {
 		_rho = rho[k - nx - 1];
@@ -289,6 +259,6 @@ __global__ void LBBC(int nx, int ny, int* Flag, double* rho, double* ux, double*
 		_uy = uy[k - nx - 1];
 		rho[k] = _rho;
 		ux[k] = 0.1;
-		f7[k] = feq(7, _rho, 0.1, 0) + f7[k - nx - 1] - feq(7, _rho, _ux, _uy);
+		f5[k] = feq(7, _rho, 0.1, 0) + f5[k - nx - 1] - feq(7, _rho, _ux, _uy);
 	}
 }

@@ -19,7 +19,6 @@ using namespace std;
 double* ux, * uy, * ux0, * uy0, * rho, * euler_xforce, * euler_yforce;
 //LBM DISTRIBUTION FUNCTIONS
 double* f0, * f1, * f2, * f3, * f4, * f5, * f6, * f7, * f8;
-double* F0, * F1, * F2, * F3, * F4, * F5, * F6, * F7, * F8;
 //TOPOLOGICAL IDENTIFIER
 int* flag;
 //MRT Operator
@@ -43,18 +42,7 @@ void initializer()
 	cudaMallocManaged( ( void** ) & f5 , size_double_euler );	cudaMallocManaged( ( void** ) & euler_xforce,	size_double_euler );
 	cudaMallocManaged( ( void** ) & f6 , size_double_euler );	cudaMallocManaged( ( void** ) & euler_yforce,	size_double_euler );
 	cudaMallocManaged( ( void** ) & f7 , size_double_euler );	
-	cudaMallocManaged( ( void** ) & f8 , size_double_euler );
-
-	cudaMallocManaged((void**)&F0, size_double_euler);
-	cudaMallocManaged((void**)&F1, size_double_euler);
-	cudaMallocManaged((void**)&F2, size_double_euler);
-	cudaMallocManaged((void**)&F3, size_double_euler);
-	cudaMallocManaged((void**)&F4, size_double_euler);
-	cudaMallocManaged((void**)&F5, size_double_euler);
-	cudaMallocManaged((void**)&F6, size_double_euler);
-	cudaMallocManaged((void**)&F7, size_double_euler);
-	cudaMallocManaged((void**)&F8, size_double_euler);
-
+	cudaMallocManaged( ( void** ) & f8 , size_double_euler );	
 	cudaMallocManaged( ( void** ) & flag,			size_int_euler );
 
 	cudaMallocManaged( ( void * * ) & S, 9 * sizeof( double ) );
@@ -106,7 +94,7 @@ void initializer()
 void output( const int m )
 {
 	ostringstream name;
-	name<<"C:\\Users\\Admin\\Desktop\\MRT_test\\flow field_"<< m<<".dat";
+	name<<"C:\\Users\\Admin\\Desktop\\Lid2D_MRT\\flow field_"<< m<<".dat";
 	ofstream out(name.str().c_str());
 
 	out<<"title=\"cavity flow\"\n"<<"VARIABLES=\"X\",\"Y\",\"U\",\"V\",\"Pressure\"\n"<<"ZONE T= \"BOX\",I="<<NX<<",J="<<NY<<",F=POINT"<<std::endl;
@@ -134,13 +122,6 @@ double Error(const double* ux, const double* uy, const double* u0x, const double
 	return temp1 / (temp2 + 1e-30);
 }
 
-inline void Swap(double& f1, double& f2)
-{
-	double temp = f1;
-	f1 = f2;
-	f2 = temp;
-}
-
 cudaError_t RunLBM()
 {
 	cudaError_t cudaStatus = cudaSetDevice( 0 );
@@ -162,36 +143,7 @@ cudaError_t RunLBM()
 		LBColl<<< grid_lbm, threads_lbm >>>( NX, NY, flag, S, rho, ux, uy, euler_xforce, euler_yforce,
 											 f0, f1, f2, f3, f4, f5, f6, f7, f8 );
 		LBBC<<< grid_lbm, threads_lbm >>>( NX, NY, flag, rho, ux, uy, f0, f1, f2, f3, f4, f5, f6, f7, f8 );
-		LBProp<<< grid_lbm, threads_lbm >>>( NX, NY, flag, f0, f1, f2, f3, f4, f5, f6, f7, f8, F0, F1, F2, F3, F4, F5, F6, F7, F8);
-		//cudaDeviceSynchronize();
-		
-		//for (int i = 0; i < NX; i++)
-		//	for (int j = 0; j < NY; j++)
-		//	{
-		//		if (flag[j * NX + i] == 'F') {
-		//			Swap(f3[j * NX + i], f1[j * NX + i + 1]);
-		//			Swap(f4[j * NX + i], f2[(j + 1) * NX + i]);
-		//			Swap(f7[j * NX + i], f5[(j + 1) * NX + i + 1]);
-		//			Swap(f8[j * NX + i], f6[(j + 1) * NX + i - 1]);
-		//		}
-		//		if (flag[j * NX + i] == 'L') {
-		//			Swap(f3[j * NX + i], f1[j * NX + i + 1]);
-		//			Swap(f7[j * NX + i], f5[(j + 1) * NX + i + 1]);
-		//		}
-		//		if (flag[j * NX + i] == 'B') {
-		//			Swap(f4[j * NX + i], f2[(j + 1) * NX + i]);
-		//			Swap(f7[j * NX + i], f5[(j + 1) * NX + i + 1]);
-		//			Swap(f8[j * NX + i], f6[(j + 1) * NX + i - 1]);
-		//		}
-		//		if (flag[j * NX + i] == 'R') {
-		//			Swap(f8[j * NX + i], f6[(j + 1) * NX + i - 1]);
-		//		}
-		//		if (flag[j * NX + i] == 'M') Swap(f7[j * NX + i], f5[(j + 1) * NX + i + 1]);
-		//		if (flag[j * NX + i] == 'N') Swap(f8[j * NX + i], f6[(j + 1) * NX + i - 1]);
-		//	}
-		LBUpgrade<<< grid_lbm, threads_lbm >>> (NX, NY, f0, f1, f2, f3, f4, f5, f6, f7, f8,
-			F0, F1, F2, F3, F4, F5, F6, F7, F8, flag);
-
+		LBProp<<< grid_lbm, threads_lbm >>>( NX, NY, flag, f0, f1, f2, f3, f4, f5, f6, f7, f8 );
 		LBmacro<<< grid_lbm, threads_lbm >>>( NX, NY, flag, rho, ux, uy, f0, f1, f2, f3, f4, f5, f6, f7, f8, ux0, uy0 );
 
 		cudaDeviceSynchronize();
@@ -228,17 +180,6 @@ Error:
 	cudaFree( f6 );		cudaFree( euler_yforce );
 	cudaFree( f7 );		
 	cudaFree( f8 );
-
-	cudaFree(F0);
-	cudaFree(F1);
-	cudaFree(F2);
-	cudaFree(F3);
-	cudaFree(F4);
-	cudaFree(F5);
-	cudaFree(F6);
-	cudaFree(F7);
-	cudaFree(F8);
-
 	cudaFree( S );		cudaFree( flag );
 	
 	return cudaStatus;

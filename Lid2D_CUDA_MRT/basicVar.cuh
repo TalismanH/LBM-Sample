@@ -6,8 +6,8 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
-const int NX = 128;
-const int NY = 128;
+const int NX = 256;
+const int NY = 256;
 
 const double rho0 = 1.0;
 const double U = 0.1;
@@ -27,14 +27,10 @@ __global__ void LBColl(int nx, int ny, int* flag, double* S, double* rho, double
 	double* f0, double* f1, double* f2, double* f3, double* f4, double* f5, double* f6, double* f7, double* f8);
 
 __global__ void LBProp(int nx, int ny, int* flag,
-	double* f0, double* f1, double* f2, double* f3, double* f4, double* f5, double* f6, double* f7, double* f8,
-	double* F0, double* F1, double* F2, double* F3, double* F4, double* F5, double* F6, double* F7, double* F8);
+	double* f0, double* f1, double* f2, double* f3, double* f4, double* f5, double* f6, double* f7, double* f8);
 
 __global__ void LBBC(int nx, int ny, int* Flag, double* rho, double* ux, double* uy,
 	double* f0, double* f1, double* f2, double* f3, double* f4, double* f5, double* f6, double* f7, double* f8);
-
-__global__ void LBUpgrade(int nx, int ny, double* f0, double* f1, double* f2, double* f3, double* f4, double* f5, double* f6, double* f7, double* f8,
-	double* F0, double* F1, double* F2, double* F3, double* F4, double* F5, double* F6, double* F7, double* F8, int* flag);
 
 __global__ void LBmacro(int nx, int ny, int* flag, double* rho, double* ux, double* uy,
 	double* f0, double* f1, double* f2, double* f3, double* f4, double* f5, double* f6, double* f7, double* f8,
